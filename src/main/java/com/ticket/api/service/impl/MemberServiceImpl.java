@@ -6,6 +6,7 @@ import com.ticket.api.entity.Member;
 import com.ticket.api.repository.MemberRepository;
 import com.ticket.api.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 회원가입
@@ -26,10 +28,15 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
-        // 저장 (DTO -> Entity 변환)
-        Member savedMember = memberRepository.save(request.toEntity());
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        return savedMember.getId();
+        Member member = Member.builder()
+                .email(request.getEmail())
+                .password(encodedPassword)
+                .name(request.getName())
+                .build();
+
+        return memberRepository.save(member).getId();
     }
 
     /**
