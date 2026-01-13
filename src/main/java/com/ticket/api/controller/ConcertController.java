@@ -1,10 +1,9 @@
 package com.ticket.api.controller;
 
-import com.ticket.api.dto.ConcertSeatResponse;
-import com.ticket.api.dto.ReservationRequest;
-import com.ticket.api.dto.TicketResponse;
+import com.ticket.api.dto.*;
 import com.ticket.api.service.ConcertService;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +28,20 @@ public class ConcertController {
 
     // 예매 API
     @PostMapping("/reserve")
-    public ResponseEntity<TicketResponse> reserveSeat(@Valid @RequestBody ReservationRequest request) {
-        return ResponseEntity.ok(concertService.reserveSeat(request));
+    // Principal: 현재 로그인한 사용자의 정보를 담고 있는 객체
+    public ResponseEntity<TicketResponse> reserveSeat(@Valid @RequestBody ReservationRequest request, Principal principal) {
+        return ResponseEntity.ok(concertService.reserveSeat(request, principal.getName()));
+    }
+
+    // 공연 목록 조회
+    @GetMapping
+    public ResponseEntity<List<ConcertResponse>> getAllConcerts() {
+        return ResponseEntity.ok(concertService.getAllConcerts());
+    }
+
+    // 특정 공연의 스케줄 조회
+    @GetMapping("/{concertId}/schedules")
+    public ResponseEntity<List<ConcertScheduleResponse>> getConcertSchedules(@PathVariable Long concertId) {
+        return ResponseEntity.ok(concertService.getConcertSchedules(concertId));
     }
 }

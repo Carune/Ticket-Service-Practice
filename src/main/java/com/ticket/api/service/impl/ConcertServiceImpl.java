@@ -1,14 +1,8 @@
 package com.ticket.api.service.impl;
 
-import com.ticket.api.dto.ConcertSeatResponse;
-import com.ticket.api.dto.ReservationRequest;
-import com.ticket.api.dto.TicketResponse;
-import com.ticket.api.entity.ConcertSeat;
-import com.ticket.api.entity.ConcertTicket;
-import com.ticket.api.entity.Member;
-import com.ticket.api.repository.ConcertSeatRepository;
-import com.ticket.api.repository.ConcertTicketRepository;
-import com.ticket.api.repository.MemberRepository;
+import com.ticket.api.dto.*;
+import com.ticket.api.entity.*;
+import com.ticket.api.repository.*;
 import com.ticket.api.service.ConcertService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +18,8 @@ public class ConcertServiceImpl implements ConcertService {
 
     private final ConcertSeatRepository concertSeatRepository;
     private final ConcertTicketRepository concertTicketRepository;
+    private final ConcertRepository concertRepository;
+    private final ConcertScheduleRepository concertScheduleRepository;
     private final MemberRepository memberRepository;
 
     @Override
@@ -42,7 +38,7 @@ public class ConcertServiceImpl implements ConcertService {
 
     @Override
     @Transactional
-    public TicketResponse reserveSeat(ReservationRequest request) {
+    public TicketResponse reserveSeat(ReservationRequest request, String email) {
         // 좌석 조회 (없으면 에러)
         ConcertSeat seat = concertSeatRepository.findById(request.getSeatId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
@@ -53,7 +49,7 @@ public class ConcertServiceImpl implements ConcertService {
         }
 
         // 회원 조회
-        Member member = memberRepository.findByEmail(request.getEmail())
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         // 좌석 상태 변경 (AVAILABLE -> RESERVED)
@@ -67,5 +63,17 @@ public class ConcertServiceImpl implements ConcertService {
                 .build();
 
         return new TicketResponse(concertTicketRepository.save(ticket));
+    }
+
+    @Override
+    public List<ConcertResponse> getAllConcerts() {
+        List<Concert> concertList = concertRepository.findAll();
+        return concertList.stream().map(ConcertResponse::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ConcertScheduleResponse> getConcertSchedules(Long concertId){
+        List<ConcertSchedule> scheduleList = concertScheduleRepository.findByConcertId(concertId);
+        return scheduleList.stream().map(ConcertScheduleResponse::new).collect(Collectors.toList());
     }
 }

@@ -14,11 +14,6 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberService memberService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<Long> signup(@Valid @RequestBody SignUpRequest request) {
-        return ResponseEntity.ok(memberService.signUp(request));
-    }
-
     @GetMapping("/{email}")
     public ResponseEntity<MemberResponse> findMember(@PathVariable String email) {
         return ResponseEntity.ok(memberService.findMember(email));

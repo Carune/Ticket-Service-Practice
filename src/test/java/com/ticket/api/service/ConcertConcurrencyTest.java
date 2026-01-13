@@ -99,7 +99,7 @@ class ConcertConcurrencyTest {
                     ReflectionTestUtils.setField(request, "email", "user" + idx + "@test.com");
 
                     // 서비스 호출 (예매 시도!)
-                    concertService.reserveSeat(request);
+                    concertService.reserveSeat(request, "user" + idx + "@test.com");
 
                     // 예외가 안 나면 성공
                     successCount.incrementAndGet();
