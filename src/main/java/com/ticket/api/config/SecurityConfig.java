@@ -44,7 +44,14 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 나머지는 무조건 인증 필요
                 )
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 끼워넣기
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(conf -> conf
+                        .authenticationEntryPoint((req, res, ex) -> {
+                            res.setStatus(401);
+                            res.setContentType("application/json");
+                            res.getWriter().write("{\"error\": \"Unauthorized\"}");
+                        })
+                );
 
         return http.build();
     }
