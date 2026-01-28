@@ -1,5 +1,6 @@
 package com.ticket.api.controller;
 
+import com.ticket.api.annotation.QueuePass;
 import com.ticket.api.dto.*;
 import com.ticket.api.service.ConcertService;
 import jakarta.validation.Valid;
@@ -26,13 +27,6 @@ public class ConcertController {
         return ResponseEntity.ok(concertService.getAvailableSeats(scheduleId));
     }
 
-    // 예매 API
-    @PostMapping("/reserve")
-    // Principal: 현재 로그인한 사용자의 정보를 담고 있는 객체
-    public ResponseEntity<TicketResponse> reserveSeat(@Valid @RequestBody ReservationRequest request, Principal principal) {
-        return ResponseEntity.ok(concertService.reserveSeat(request, principal.getName()));
-    }
-
     // 공연 목록 조회
     @GetMapping
     public ResponseEntity<List<ConcertResponse>> getAllConcerts() {
@@ -43,5 +37,14 @@ public class ConcertController {
     @GetMapping("/{concertId}/schedules")
     public ResponseEntity<List<ConcertScheduleResponse>> getConcertSchedules(@PathVariable Long concertId) {
         return ResponseEntity.ok(concertService.getConcertSchedules(concertId));
+    }
+
+    @QueuePass
+    @PostMapping("/reserve")
+    public ResponseEntity<TicketResponse> reserveSeat(
+            @Valid @RequestBody ReservationRequest request,
+            Principal principal
+    ) {
+        return ResponseEntity.ok(concertService.reserveSeat(request, principal.getName()));
     }
 }
