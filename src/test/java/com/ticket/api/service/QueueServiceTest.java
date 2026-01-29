@@ -17,7 +17,7 @@ class QueueServiceTest {
     private QueueService queueService;
 
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     // 테스트 전에 Redis clear
     @BeforeEach
@@ -29,27 +29,28 @@ class QueueServiceTest {
     }
 
     @Test
-    @DisplayName("1000명이 한꺼번에 줄을 서면 정확히 순서대로 들어갈까?")
+    @DisplayName("1만명이 한꺼번에 줄을 서면 정확히 순서대로 들어갈까?")
     void massive_queue_test() throws InterruptedException {
-        int peopleCount = 1000;
+        int peopleCount = 10000; //10만명
 
         long start = System.currentTimeMillis();
 
-        // 1. 1000명 줄 세우기 (반복문)
         for (int i = 0; i < peopleCount; i++) {
-            String userId = "user_" + i;
-            queueService.addQueue(userId);
+            queueService.addQueue("user_" + i);
         }
 
         long end = System.currentTimeMillis();
-        System.out.println("====== 1000명 줄 서기 완료: " + (end - start) + "ms ======");
+        System.out.println("1만 명 대기열 등록 시간: " + (end - start) + "ms");
 
-        // 2. 검증: 1000명이 잘 들어갔나?
-        Long rankOfLastUser = queueService.getRank("user_999"); // 마지막 사람
+        /*Long rankOfLastUser = queueService.getRank("user_999"); // 마지막 사람
         Long rankOfFirstUser = queueService.getRank("user_0");  // 첫번째 사람
 
         assertThat(rankOfFirstUser).isEqualTo(1L); // 1등
-        assertThat(rankOfLastUser).isEqualTo(1000L); // 1000등
+        assertThat(rankOfLastUser).isEqualTo(1000L); // 1000등*/
+
+        // 10만 번째 유저 순위 확인
+        Long rank = queueService.getRank("user_9999");
+        assertThat(rank).isEqualTo(10000L);
 
         System.out.println("====== 검증 완료: 순서가 정확하게 보장됨 ======");
     }

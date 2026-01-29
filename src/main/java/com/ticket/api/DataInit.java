@@ -42,7 +42,7 @@ public class DataInit implements CommandLineRunner {
         // 2. 스케줄 생성
         ConcertSchedule schedule = ConcertSchedule.builder()
                 .concert(concert)
-                .concertDate(LocalDateTime.of(2025, 12, 25, 19, 0))
+                .concertDate(LocalDateTime.now().plusDays(1))
                 .build();
         concertScheduleRepository.save(schedule);
 

@@ -1,8 +1,8 @@
 package com.ticket.api.controller;
 
-import com.ticket.api.service.ConcertService;
 import com.ticket.api.service.QueueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,6 @@ import java.security.Principal;
 public class QueueController {
 
     private final QueueService queueService;
-    private final ConcertService concertService;
 
     @PostMapping
     public ResponseEntity<String> addToQueue(Principal principal) {
@@ -38,6 +37,7 @@ public class QueueController {
     }
 
     // [테스트] 더미 유저 1000명 대기열
+    @Profile("!prod")
     @PostMapping("/dummy")
     public ResponseEntity<String> addDummy() {
         for (int i = 0; i < 1000; i++) {

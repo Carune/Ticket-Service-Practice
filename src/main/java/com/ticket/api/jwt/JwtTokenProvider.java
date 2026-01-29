@@ -52,7 +52,7 @@ public class JwtTokenProvider {
         String userId = claims.getSubject();
         String email = claims.get("email", String.class);
 
-        UserDetails principal = new User(email, "", Collections.emptyList());
+        UserDetails principal = new User(userId, "", Collections.emptyList());
 
         return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
     }

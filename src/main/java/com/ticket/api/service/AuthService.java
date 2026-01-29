@@ -1,10 +1,10 @@
-package com.ticket.api.service.impl;
+package com.ticket.api.service;
 
-import com.ticket.api.dto.MemberResponse;
+import com.ticket.api.dto.LoginRequest;
 import com.ticket.api.dto.SignUpRequest;
 import com.ticket.api.entity.Member;
+import com.ticket.api.jwt.JwtTokenProvider;
 import com.ticket.api.repository.MemberRepository;
-import com.ticket.api.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,15 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class MemberServiceImpl implements MemberService {
+public class AuthService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    /**
-     * 회원가입
-     */
-    @Override
     @Transactional
     public Long signUp(SignUpRequest request) {
         if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -39,15 +36,16 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.save(member).getId();
     }
 
-    /**
-     * 회원 조회
-     */
-    @Override
-    public MemberResponse findMember(String email) {
+    public String login(LoginRequest request) {
+        String email = request.getEmail();
+        String password = request.getPassword();
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
 
-        // Entity -> DTO 변환
-        return new MemberResponse(member);
+        if (!passwordEncoder.matches(password, member.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return jwtTokenProvider.createToken(member.getId(), member.getEmail());
     }
 }

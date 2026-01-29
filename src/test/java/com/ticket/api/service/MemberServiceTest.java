@@ -3,7 +3,6 @@ package com.ticket.api.service;
 import com.ticket.api.dto.SignUpRequest;
 import com.ticket.api.entity.Member;
 import com.ticket.api.repository.MemberRepository;
-import com.ticket.api.service.impl.MemberServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,7 @@ class MemberServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private MemberServiceImpl memberService;
+    private MemberService memberService;
 
     @Test
     @DisplayName("회원가입_성공_테스트")
