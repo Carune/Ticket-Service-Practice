@@ -1,9 +1,7 @@
 package com.ticket.api.controller;
 
 import com.ticket.api.dto.MemberResponse;
-import com.ticket.api.dto.SignUpRequest;
 import com.ticket.api.service.MemberService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

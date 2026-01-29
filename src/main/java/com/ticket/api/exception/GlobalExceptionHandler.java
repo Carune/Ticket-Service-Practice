@@ -30,10 +30,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
-    // [추가] 낙관적 락 충돌 시 (동시성 이슈)
+    // 낙관적 락 충돌 시 (동시성 이슈)
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<String> handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT) // 409 Conflict
                 .body("이미 예매된 좌석입니다. 다시 시도해주세요.");
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 }

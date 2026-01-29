@@ -6,6 +6,8 @@ import com.ticket.api.service.ConcertService;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +31,8 @@ public class ConcertController {
 
     // 공연 목록 조회
     @GetMapping
-    public ResponseEntity<List<ConcertResponse>> getAllConcerts() {
-        return ResponseEntity.ok(concertService.getAllConcerts());
+    public ResponseEntity<List<ConcertResponse>> getAllConcerts(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+        return ResponseEntity.ok(concertService.getAllConcerts(pageable));
     }
 
     // 특정 공연의 스케줄 조회
