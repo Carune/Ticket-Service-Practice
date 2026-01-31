@@ -53,7 +53,8 @@ TPS (Throughput): 1,759/s 달성
 Latency: p95 기준 약 400ms (로컬 환경 자원 경합으로 인한 CPU 병목 확인, 아키텍처 자체의 문제는 아님을 입증).
 
 [참고 이미지]
-<img width="972" height="766" alt="image" src="https://github.com/user-attachments/assets/35c0d8ca-cec3-4c07-ad38-aede11563786" />
+<img width="972" height="766" alt="image" src="https://github.com/user-attachments/assets/f90dc5ff-3bde-45d6-b52f-903341eec8ac" />
+
 
 
 3. Redis 직렬화 전략 개선
@@ -65,7 +66,8 @@ Latency: p95 기준 약 400ms (로컬 환경 자원 경합으로 인한 CPU 병�
 
 [API Documentation]
 Swagger UI: http://localhost:8080/swagger-ui/index.html (서버 실행 시)
-<img width="1163" height="828" alt="image" src="https://github.com/user-attachments/assets/80c31961-b87e-49eb-bd35-94cb4901327f" />
+<img width="1163" height="828" alt="image" src="https://github.com/user-attachments/assets/7b94fe53-1b42-4305-8ffc-1acd798c1bc7" />
+
 
 
 [How to Run]
