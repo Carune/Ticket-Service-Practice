@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/queue")
@@ -24,6 +25,14 @@ public class QueueController {
 
         return ResponseEntity.ok("대기열 등록 완료. User ID: " + userId);
     }
+
+    // [테스트용] @RequestBody로 userId를 직접 받음 (부하테스트용)
+    /*@PostMapping
+    public ResponseEntity<String> addToQueue(@RequestBody Map<String, String> request) {
+        String userId = request.get("userId"); // k6가 보낸 userId 사용
+        queueService.addQueue(userId);
+        return ResponseEntity.ok("대기열 등록 완료");
+    }*/
 
     @GetMapping("/rank")
     public ResponseEntity<String> getRank(Principal principal) {
