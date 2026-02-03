@@ -1,0 +1,44 @@
+services:
+  # 1. Spring Boot 서버
+  api-server:
+    container_name: ticket-server
+    build: .  # 현재 폴더의 Dockerfile로 빌드
+    ports:
+      - "8080:8080" # 외부 접속용 포트
+    environment:
+      # MySQL
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/ticket_db
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+      # Redis
+      SPRING_DATA_REDIS_HOST: redis-container
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - mysql-container
+      - redis-container
+    volumes:
+      - ./logs:/logs  # 호스트의 logs 폴더와 컨테이너의 /logs 연결
+    restart: always
+
+  # 2. MySQL
+  mysql-container:
+    image: mysql:8.0
+    container_name: ticket-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE_NAME}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  # 3. Redis
+  redis-container:
+    image: redis:latest
+    container_name: ticket-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD} # AOF 설정 (데이터 증발 방지)
+    volumes:
+      - ./redis-data:/data
