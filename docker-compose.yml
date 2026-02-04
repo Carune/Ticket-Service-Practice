@@ -1,8 +1,11 @@
 services:
   # 1. Spring Boot 서버
   api-server:
+    image: carune99/ticket-server:latest
     container_name: ticket-server
     build: .  # 현재 폴더의 Dockerfile로 빌드
+    env_file:
+      - .env
     ports:
       - "8080:8080" # 외부 접속용 포트
     environment:

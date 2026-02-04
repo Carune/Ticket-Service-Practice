@@ -14,11 +14,11 @@ public class QueueScheduler {
 
     private final QueueService queueService;
 
-    /*@Value("${scheduler.queue.fetch-size:50}")
+    @Value("${scheduler.queue.fetch-size:50}")
     private int fetchSize;
 
     @Scheduled(fixedDelayString = "${scheduler.queue.delay:1000}") // 딜레이도 설정으로 관리
     public void enterUsers() {
         queueService.allowUser(fetchSize);
-    }*/
+    }
 }

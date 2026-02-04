@@ -41,4 +41,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
+
+    // 3초 광클 방지 예외 처리
+    @ExceptionHandler(TooManyRequestException.class)
+    public ResponseEntity<String> handleTooManyRequestException(TooManyRequestException ex) {
+        // 429 Too Many Requests 상태 코드 반환
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ex.getMessage());
+    }
 }
