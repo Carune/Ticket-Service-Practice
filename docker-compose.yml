@@ -11,7 +11,8 @@ services:
     environment:
       # MySQL
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/ticket_db
-      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
       # Redis
       SPRING_DATA_REDIS_HOST: redis-container
