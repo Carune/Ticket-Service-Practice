@@ -30,7 +30,7 @@ public class SwaggerConfig {
                         .version("v1.0.0")
                         .description("""
                                 ## 프로젝트 개요
-                                대규모 트래픽을 감당하는 콘서트 티켓팅 서비스의 백엔드 API 문서입니다.
+                                대규모 트래픽을 감당하는 콘서트 티켓팅 서비스의 백엔드 API 문서입니다
                                 
                                 ### 기술 스택
                                 - **Architecture**: Layered Architecture
