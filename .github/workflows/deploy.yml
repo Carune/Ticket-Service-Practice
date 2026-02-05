@@ -46,6 +46,12 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
+            # 프로젝트 폴더로 이동
+            cd ~/Ticket-Service-Practice
+            
+            # 최신 설정 파일 가져오기
+            git pull origin main
+            
             # 실행 중인 컨테이너 종료
             sudo docker compose down
             
