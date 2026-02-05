@@ -1,19 +1,23 @@
 # 대용량 트래픽 처리를 위한 콘서트 대기열 예약 서비스
 
+http://3.35.212.206:8080/swagger-ui/index.html
+
 > **"수십만 명이 동시에 접속하는 연예인 콘서트 티켓팅, 어떻게 서버를 터트리지 않고 순서대로 입장시킬까?"** 라는 고민에서 시작한 프로젝트입니다.<br>
 >  Redis 기반의 대기열 시스템과 낙관적 락을 활용한 동시성 제어를 통해 데이터 정합성과 시스템 안정성을 확보했습니다.
 <br>
+
 
 ## Tech Stack
 
 | Category | Technology |
 | :--- | :--- |
 | **Language** | Java 17 |
-| **Framework** | Spring Boot 4.0.1, Spring Security |
-| **Database** | MySQL 8.0, Redis (Stand-alone) |
+| **Framework** | Spring Boot, Spring Security |
+| **Database** | MySQL 8.0, Redis |
+| **Infrastructure** | AWS EC2, Docker Compose, GitHub Actions |
 | **ORM** | Spring Data JPA, QueryDSL |
-| **Test** | JUnit5, Mockito, k6 (Load Testing) |
-| **Tools** | Docker, Gradle, IntelliJ |
+| **Test** | JUnit5, Mockito, k6 |
+| **Tools** | Swagger, Gradle, IntelliJ |
 
 <br>
 
@@ -58,16 +62,24 @@ Latency: p95 기준 약 400ms (로컬 환경 자원 경합으로 인한 CPU 병�
 
 
 ```
-3. Redis 직렬화 전략 개선
-문제: GenericJackson2JsonRedisSerializer 사용 시 Redis에 클래스 패키지 정보(@class)가 함께 저장됨. 이로 인해 패키지 구조 변경 시 역직렬화 에러(Deserialization Error) 발생 위험 존재.
-해결: StringRedisSerializer로 교체하고, DTO를 직접 JSON String으로 변환하여 저장.
-효과: 외부 패키지 의존성을 제거하여 시스템 유연성 확보.
+3. Redis Pipelining을 통한 대기열 성능 최적화 (99% 개선)
+문제 상황: 스케줄러가 1000명의 유저를 입장시킬 때 `for`문을 돌며 `SET` 명령어를 1000번 호출하여 RTT(Round Trip Time)로 인한 네트워크 병목 발생
 
-[Entity Relationship Diagram (ERD)]
+해결 과정: Redis Pipelining을 도입하여 1000개의 명령어를 패킷 하나로 묶어 전송
 
-[API Documentation]
-Swagger UI: http://localhost:8080/swagger-ui/index.html (서버 실행 시)
+결과: 네트워크 통신 횟수 1000회 → 1회 단축, 대량 트래픽 처리 속도 개선
+
+4. GitHub Actions & AWS 기반의 자동 배포 파이프라인(CI/CD) 구축
+문제 상황: 로컬에서 빌드 후 수동으로 서버에 파일을 옮기는 비효율적 배포 과정
+
+해결 과정: GitHub Actions를 활용하여 main 브랜치 푸시 시 Docker 이미지 빌드 → Docker Hub 푸시 → AWS EC2 배포 전 과정 자동화
+  - .env와 같은 민감 정보는 GitHub Secrets를 통해 관리하고 배포 시점에 동적으로 주입하여 보안성 강화
+
+결과: 네트워크 통신 횟수 1000회 → 1회 단축, 대량 트래픽 처리 속도 개선
 ```
+[API Documentation]
+Swagger UI: http://3.35.212.206:8080/swagger-ui/index.html
+
 <img width="1163" height="828" alt="image" src="https://github.com/user-attachments/assets/7b94fe53-1b42-4305-8ffc-1acd798c1bc7" />
 
 
@@ -80,6 +92,6 @@ Java 17+
 - Steps
 1. Clone the repository
   git clone https://github.com/your-username/ticket-service.git
-2. Run Infrastructure (Redis, MySQL)
-3. Build & Run
+2. Create .env file
+3. Run with Docker Compose (App + DB + Redis)
 ```
