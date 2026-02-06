@@ -57,7 +57,7 @@ jobs:
             git reset --hard origin/main
             git pull origin main
             
-            # 실행 중인 컨테이너 종료
+            # 실행 중인 컨테
             sudo docker compose down
             
             # 최신 이미지 받아오기
