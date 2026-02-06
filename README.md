@@ -47,27 +47,36 @@ JPA의 @Version을 사용하여 애플리케이션 레벨에서 버전을 체크
 ExecutorService를 활용한 1,000명 동시 요청 테스트 수행.
 성공 1건, 실패 999건 (정확한 락 동작 확인).
 
-@Transactional 격리 수준 문제를 해결하여 테스트 신뢰성 확보.
-
 2. 대기열 시스템 성능 검증 (부하 테스트)
-목표: Redis 기반 대기열 시스템이 실제 대규모 트래픽을 견딜 수 있는지 검증.
-테스트 환경: k6 (VUser 1,000명, Ramp-up/down 시나리오 적용)
+목표: 대규모 트래픽 발생 시 Redis 기반 대기열 시스템의 가용성 및 처리량 한계 검증
+테스트 환경: k6 (VUser 1000명, Ramp-up/down 시나리오 적용), Prometheus, Grafana
 결과:
-TPS (Throughput): 1,759/s 달성
-안정성: 요청 성공률 100% (Error 0%).
-Latency: p95 기준 약 400ms (로컬 환경 자원 경합으로 인한 CPU 병목 확인, 아키텍처 자체의 문제는 아님을 입증).
+TPS (Throughput): 1862/s 달성
+안정성: 요청 성공률 100% (Error 0%)
+Latency: p95 기준 약 434ms (로컬 환경 자원 경합으로 인한 CPU 병목 확인, 에러 없이 전량 처리됨을 확인하여 아키텍처의 안정성을 입증)
 ``` 
 [참고 이미지]
-<img width="972" height="766" alt="image" src="https://github.com/user-attachments/assets/f90dc5ff-3bde-45d6-b52f-903341eec8ac" />
+<img width="1896" height="909" alt="image" src="https://github.com/user-attachments/assets/e75ad9fa-aeb5-4666-b447-4c14dbe1e865" />
+
 
 
 ```
-3. Redis Pipelining을 통한 대기열 성능 최적화 (99% 개선)
-문제 상황: 스케줄러가 1000명의 유저를 입장시킬 때 `for`문을 돌며 `SET` 명령어를 1000번 호출하여 RTT(Round Trip Time)로 인한 네트워크 병목 발생
+3. Redis Pipelining을 통한 대기열 성능 최적화
+문제 상황: 스케줄러가 1000명의 유저를 입장시킬 때 `for`문을 돌며 `SET` 명령어를 1000번 호출하여 Redis와의 잦은 네트워크 통신(RTT)이 병목이 될 것을 우려함
 
-해결 과정: Redis Pipelining을 도입하여 1000개의 명령어를 패킷 하나로 묶어 전송
+해결 과정:
+- Redis Pipelining 도입: 명령어를 패킷 단위로 묶어 전송하여 RTT를 획기적으로 단축
+- Batch Processing: 대량 처리 시 안정성을 위해 1000건 단위의 Chunk 분할 처리 로직 적용
 
-결과: 네트워크 통신 횟수 1000회 → 1회 단축, 대량 트래픽 처리 속도 개선
+검증 : 전체 부하 테스트와 별개로 스케줄러 로직의 효율성만을 검증하기 위한 별도 격리 테스트 수행
+    - 결과: Loop(7.4초) vs Pipeline(0.9초)
+    - 성과: 약 7배의 성능 향상을 데이터로 확인
+
+결과: 네트워크 통신 횟수 1000회 → 1회 단축, 동일 환경 대비 처리 속도 약 760% 향상 (7.4s → 0.9s)
+```
+[참고 이미지]
+<img width="497" height="231" alt="image" src="https://github.com/user-attachments/assets/4abf1fce-583c-41e7-87f6-cc4256f44f70" />
+
 
 4. GitHub Actions & AWS 기반의 자동 배포 파이프라인(CI/CD) 구축
 문제 상황: 로컬에서 빌드 후 수동으로 서버에 파일을 옮기는 비효율적 배포 과정
