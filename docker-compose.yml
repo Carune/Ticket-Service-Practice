@@ -54,7 +54,7 @@ services:
       - ./redis-data:/data
 
   # 4. Prometheus (데이터 수집)
-  prometheus:
+  Prometheus:
     image: prom/prometheus:latest
     container_name: ticket-prometheus
     volumes:
@@ -67,7 +67,7 @@ services:
       - default
 
   # 5. Grafana (데이터 시각화)
-  grafana:
+  Grafana:
     image: grafana/grafana:latest
     container_name: ticket-grafana
     ports:
