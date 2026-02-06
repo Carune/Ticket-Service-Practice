@@ -12,6 +12,9 @@ services:
 
       LOGGING_FILE_NAME: /logs/ticket-server.log
       TZ: Asia/Seoul
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "prometheus,health"
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
+      MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
       # MySQL
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/ticket_db
       SPRING_DATASOURCE_USERNAME: root
