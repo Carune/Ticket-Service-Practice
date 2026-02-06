@@ -9,6 +9,8 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -87,20 +89,30 @@ public class QueueService {
         }
 
         // redis pipeline
-        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            for (ZSetOperations.TypedTuple<String> tuple : tuples) {
-                String userId = tuple.getValue();
-                String key = ACTIVE_KEY_PREFIX + userId;
 
-                // (key, seconds, value)
-                connection.stringCommands().setEx(
-                        key.getBytes(),
-                        300, // 5분 (300초)
-                        "true".getBytes()
-                );
-            }
-            return null;
-        });
+        List<ZSetOperations.TypedTuple<String>> tupleList = new ArrayList<>(tuples);
+        int BATCH_SIZE = 1000;
+
+        for (int i = 0; i < tupleList.size(); i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, tupleList.size());
+            List<ZSetOperations.TypedTuple<String>> batch = tupleList.subList(i, end);
+
+            // 끊어낸 batch만큼만 파이프라인 전송
+            redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+                for (ZSetOperations.TypedTuple<String> tuple : batch) {
+                    String userId = tuple.getValue();
+                    String key = ACTIVE_KEY_PREFIX + userId;
+                    connection.stringCommands().setEx(key.getBytes(), 300, "true".getBytes());
+                }
+                return null;
+            });
+        }
+        /*for (ZSetOperations.TypedTuple<String> tuple : tuples) {
+            String userId = tuple.getValue();
+            String key = ACTIVE_KEY_PREFIX + userId;
+
+            redisTemplate.opsForValue().set(key, "true", Duration.ofMinutes(5));
+        }*/
 
         log.info("🚀 유저 {}명 입장 처리 완료 (Pipeline 적용)", tuples.size());
     }

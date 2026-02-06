@@ -40,7 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**", "/v3/api-docs/**", // Swagger
                                 "/api/v1/auth/**"  // 로그인/회원가입은 누구나 접근 가능
-                                /*, "/api/v1/queue" // k6 부하테스트용*/
+                                ,"/actuator/**" // 프로메테우스
+                                , "/api/v1/queue" // k6 부하테스트용
                         ).permitAll()
                         .anyRequest().authenticated() // 나머지는 무조건 인증 필요
                 )
