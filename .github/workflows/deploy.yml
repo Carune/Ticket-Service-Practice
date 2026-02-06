@@ -49,7 +49,12 @@ jobs:
             # 프로젝트 폴더로 이동
             cd ~/Ticket-Service-Practice
             
+            mkdir -p logs
+            chmod 777 logs
+            
             # 최신 설정 파일 가져오기
+            git fetch --all
+            git reset --hard origin/main
             git pull origin main
             
             # 실행 중인 컨테이너 종료
