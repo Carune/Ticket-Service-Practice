@@ -15,6 +15,7 @@ http://3.35.212.206:8080/swagger-ui/index.html
 | **Framework** | Spring Boot, Spring Security |
 | **Database** | MySQL 8.0, Redis |
 | **Infrastructure** | AWS EC2, Docker Compose, GitHub Actions |
+| **Monitoring** | Prometheus, Grafana |
 | **ORM** | Spring Data JPA, QueryDSL |
 | **Test** | JUnit5, Mockito, k6 |
 | **Tools** | Swagger, Gradle, IntelliJ |
@@ -75,9 +76,10 @@ Latency: p95 기준 약 434ms (로컬 환경 자원 경합으로 인한 CPU 병�
 결과: 네트워크 통신 횟수 1000회 → 1회 단축, 동일 환경 대비 처리 속도 약 760% 향상 (7.4s → 0.9s)
 ```
 [참고 이미지]
+
 <img width="497" height="231" alt="image" src="https://github.com/user-attachments/assets/4abf1fce-583c-41e7-87f6-cc4256f44f70" />
 
-
+```
 4. GitHub Actions & AWS 기반의 자동 배포 파이프라인(CI/CD) 구축
 문제 상황: 로컬에서 빌드 후 수동으로 서버에 파일을 옮기는 비효율적 배포 과정
 
