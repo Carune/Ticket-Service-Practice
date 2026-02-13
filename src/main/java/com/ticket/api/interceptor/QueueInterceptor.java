@@ -21,34 +21,34 @@ public class QueueInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // ?붿껌??泥섎━??硫붿꽌?쒓? HandlerMethod?몄? ?뺤씤
+        // 요청을 처리할 메서드가 HandlerMethod인지 확인
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
 
         HandlerMethod handlerMethod = (HandlerMethod) handler;
 
-        // 硫붿꽌?쒖뿉 @QueuePass ?대끂?뚯씠?섏씠 遺숈뼱?덈뒗吏 ?뺤씤
+        // 메서드에 @QueuePass 어노테이션이 붙어있는지 확인
         QueuePass queuePass = handlerMethod.getMethodAnnotation(QueuePass.class);
         if (queuePass == null) {
-            return true; // ?대끂?뚯씠???놁쑝硫?洹몃깷 ?듦낵
+            return true; // 어노테이션이 없으면 그냥 통과
         }
 
-        // ?꾪꽣瑜??대? ?듦낵?덉쑝誘濡?SecurityContext???몄쬆 ?뺣낫媛 ?덉쓬
+        // 필터를 이미 통과했으므로 SecurityContext에 인증 정보가 있음
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getName() == null) {
-            throw new IllegalStateException("?몄쬆 ?뺣낫媛 ?놁뒿?덈떎.");
+            throw new IllegalStateException("인증 정보가 없습니다.");
         }
 
         String email = authentication.getName();
-        log.info("?湲곗뿴 ?듦낵 寃利??쒖옉 - User: {}", email);
+        log.info("대기열 통과 검증 시작 - User: {}", email);
 
-        // ?湲곗뿴 寃利?(?낆옣沅??놁쑝硫??먮윭)
+        // 대기열 검증(입장권 없으면 에러)
         if (!queueService.isAllowed(email)) {
-            log.warn("?湲곗뿴 誘명넻怨??좎? ?묎렐 李⑤떒 - User: {}", email);
-            throw new IllegalStateException("?湲곗뿴???듦낵?섏? ?딆? ?좎??낅땲?? 以꾩쓣 ?쒖＜?몄슂.");
+            log.warn("대기열 미통과 사용자 접근 차단 - User: {}", email);
+            throw new IllegalStateException("대기열을 통과하지 못한 사용자입니다. 순서를 기다려주세요.");
         }
 
-        return true; // 寃???듦낵 -> 而⑦듃濡ㅻ윭 ?ㅽ뻾
+        return true; // 검증 통과 -> 컨트롤러 실행
     }
 }
