@@ -1,5 +1,7 @@
 package com.ticket.api.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticket.api.exception.ErrorResponse;
 import com.ticket.api.jwt.JwtAuthenticationFilter;
 import com.ticket.api.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
@@ -13,14 +15,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.nio.charset.StandardCharsets;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final ObjectMapper objectMapper;
 
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.objectMapper = objectMapper;
     }
 
     // BCrypt를 스프링 빈으로 등록
@@ -39,19 +45,24 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui/**", "/v3/api-docs/**", // Swagger
-                                "/api/v1/auth/**"  // 로그인/회원가입은 누구나 접근 가능
-                                ,"/actuator/**" // 프로메테우스
-                                , "/api/v1/queue" // k6 부하테스트용
+                                "/api/v1/auth/**",  // 로그인/회원가입 경로는 인증 없이 접근 가능
+                                "/actuator/**" // 모니터링
                         ).permitAll()
-                        .anyRequest().authenticated() // 나머지는 무조건 인증 필요
+                        .anyRequest().authenticated() // 나머지는 인증 필요
                 )
-                // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 끼워넣기
+                // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(conf -> conf
                         .authenticationEntryPoint((req, res, ex) -> {
                             res.setStatus(401);
+                            res.setCharacterEncoding(StandardCharsets.UTF_8.name());
                             res.setContentType("application/json");
-                            res.getWriter().write("{\"error\": \"Unauthorized\"}");
+                            ErrorResponse error = ErrorResponse.of(
+                                    "UNAUTHORIZED",
+                                    "인증이 필요합니다.",
+                                    req.getRequestURI()
+                            );
+                            objectMapper.writeValue(res.getWriter(), error);
                         })
                 );
 
