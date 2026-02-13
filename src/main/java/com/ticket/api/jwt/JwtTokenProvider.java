@@ -31,10 +31,9 @@ public class JwtTokenProvider {
     }
 
     // 토큰 생성 (로그인 시 호출)
-    public String createToken(Long userId, String email) {
+    public String createToken(String email) {
         return Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .claim("email", email)
+                .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -49,9 +48,7 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        String userId = claims.getSubject();
-        String email = claims.get("email", String.class);
-
+        String email = claims.getSubject();
         UserDetails principal = new User(email, "", Collections.emptyList());
 
         return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
