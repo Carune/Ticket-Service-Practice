@@ -1,5 +1,6 @@
 package com.ticket.api.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -15,38 +16,54 @@ public class GlobalExceptionHandler {
 
     // @Valid 검증 실패 시
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage()));
 
-        // 400 Bad Request 리턴
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of("VALIDATION_ERROR", "요청 값이 올바르지 않습니다.", request.getRequestURI(), errors));
     }
 
     // 비즈니스 로직 예외
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of("INVALID_ARGUMENT", ex.getMessage(), request.getRequestURI()));
     }
 
-    // 낙관적 락 충돌 시 (동시성 이슈)
+    // 낙관적 락 충돌 시
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-    public ResponseEntity<String> handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT) // 409 Conflict
-                .body("이미 예매된 좌석입니다. 다시 시도해주세요.");
+    public ResponseEntity<ErrorResponse> handleOptimisticLockException(
+            ObjectOptimisticLockingFailureException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.of("OPTIMISTIC_LOCK", "이미 예약된 좌석입니다. 다시 시도해주세요.", request.getRequestURI()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(
+            IllegalStateException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.of("ILLEGAL_STATE", ex.getMessage(), request.getRequestURI()));
     }
 
-    // 3초 광클 방지 예외 처리
+    // 3초 쿨다운 예외 처리
     @ExceptionHandler(TooManyRequestException.class)
-    public ResponseEntity<String> handleTooManyRequestException(TooManyRequestException ex) {
-        // 429 Too Many Requests 상태 코드 반환
+    public ResponseEntity<ErrorResponse> handleTooManyRequestException(
+            TooManyRequestException ex,
+            HttpServletRequest request
+    ) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                .body(ex.getMessage());
+                .body(ErrorResponse.of("TOO_MANY_REQUESTS", ex.getMessage(), request.getRequestURI()));
     }
 }

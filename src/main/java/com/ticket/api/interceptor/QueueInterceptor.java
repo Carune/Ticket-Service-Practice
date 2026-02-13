@@ -31,7 +31,7 @@ public class QueueInterceptor implements HandlerInterceptor {
         // 메서드에 @QueuePass 어노테이션이 붙어있는지 확인
         QueuePass queuePass = handlerMethod.getMethodAnnotation(QueuePass.class);
         if (queuePass == null) {
-            return true; // 어노테이션 없으면 그냥 통과
+            return true; // 어노테이션이 없으면 그냥 통과
         }
 
         // 필터를 이미 통과했으므로 SecurityContext에 인증 정보가 있음
@@ -40,15 +40,15 @@ public class QueueInterceptor implements HandlerInterceptor {
             throw new IllegalStateException("인증 정보가 없습니다.");
         }
 
-        String userId = authentication.getName();
-        log.info("대기열 통과 검증 시작 - User: {}", userId);
+        String email = authentication.getName();
+        log.info("대기열 통과 검증 시작 - User: {}", email);
 
-        // 대기열 검증 (입장권 없으면 에러)
-        if (!queueService.isAllowed(userId)) {
-            log.warn("대기열 미통과 유저 접근 차단 - User: {}", userId);
-            throw new IllegalStateException("대기열을 통과하지 않은 유저입니다. 줄을 서주세요.");
+        // 대기열 검증(입장권 없으면 에러)
+        if (!queueService.isAllowed(email)) {
+            log.warn("대기열 미통과 사용자 접근 차단 - User: {}", email);
+            throw new IllegalStateException("대기열을 통과하지 못한 사용자입니다. 순서를 기다려주세요.");
         }
 
-        return true; // 검사 통과 -> 컨트롤러 실행
+        return true; // 검증 통과 -> 컨트롤러 실행
     }
 }
